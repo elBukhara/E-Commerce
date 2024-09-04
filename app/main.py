@@ -2,12 +2,12 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
 from database import create_tables, delete_tables
-from routers.items import router as items_router 
+from routers import items, users, carts
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await delete_tables()
-    print("Shutting down the database...")
+    # await delete_tables()
+    # print("Shutting down the database...")
     await create_tables()
     print("The database is successfully created!")
     yield
@@ -15,4 +15,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-app.include_router(items_router)
+
+app.include_router(items.router)
+app.include_router(users.router)
+app.include_router(carts.router)
