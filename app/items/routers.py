@@ -2,8 +2,8 @@ from fastapi import APIRouter
 from fastapi import Depends
 from typing import Annotated
 
-from schemas import AddItem, Item
-from repository import ItemRepository
+from .schemas import AddItem, Item
+from .repository import ItemRepository
 
 router = APIRouter(
     prefix="/items",

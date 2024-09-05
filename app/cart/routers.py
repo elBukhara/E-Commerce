@@ -2,8 +2,8 @@ from fastapi import APIRouter
 from fastapi import Depends
 from typing import Annotated
 
-from schemas import CartCreate, Cart
-from repository import CartRepository
+from .schemas import CartCreate, Cart
+from .repository import CartRepository
 
 router = APIRouter(
     prefix="/carts",

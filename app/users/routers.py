@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated
 
-from schemas import UserCreate, User
-from repository import UserRepository
+from .schemas import UserCreate, User
+from .repository import UserRepository
 
 router = APIRouter(
     prefix="/users",

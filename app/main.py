@@ -2,7 +2,10 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
 from database import create_tables, delete_tables
-from routers import items, users, carts
+from items.routers import router as items_router
+from cart.routers import router as cart_router
+from users.routers import router as users_router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -15,7 +18,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-
-app.include_router(items.router)
-app.include_router(users.router)
-app.include_router(carts.router)
+app.include_router(items_router)
+app.include_router(users_router)
+app.include_router(cart_router)
