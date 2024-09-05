@@ -1,18 +1,23 @@
 from sqlalchemy import select, delete
-from database import async_session
+from sqlalchemy.orm import selectinload
 
-from .models import ItemOrm
+from database import async_session
+from .models import ItemOrm, CategoryOrm
 from .schemas import AddItem, Item
 
 class ItemRepository:
     @classmethod
     async def add_item(cls, item: AddItem) -> int:
         async with async_session() as session:
+            # Ensure the category exists before adding the item
+            category = await session.get(CategoryOrm, item.category_id)
+            if not category:
+                raise ValueError("Invalid category ID")
+
             item_dict = item.model_dump()
-            
             item = ItemOrm(**item_dict)
             session.add(item)
-            
+
             await session.flush()
             await session.commit()
             return item.id
@@ -33,20 +38,21 @@ class ItemRepository:
     @classmethod
     async def get_all_items(cls) -> list[Item]:
         async with async_session() as session:
-            
-            query = select(ItemOrm)
-            
+            query = select(ItemOrm).join(ItemOrm.category).options(
+                selectinload(ItemOrm.category)  # Load category with the item
+            )
             result = await session.execute(query)
             task_models = result.scalars().all()
-            # TODO fix the sample output
-            # task_schemas = [Item.model_validate(task_model) for task_model in task_models]
-            
             return task_models
     
     @classmethod
     async def get_item(cls, item_id: int) -> Item:
         async with async_session() as session:
-            item = await session.get(ItemOrm, item_id)
-            
-            return item
+            query = select(ItemOrm).options(selectinload(ItemOrm.category)).where(ItemOrm.id == item_id)
+            result = await session.execute(query)
+            item = result.scalar_one_or_none()
 
+            if item is None:
+                raise ValueError(f"Item with ID {item_id} not found")
+
+            return item
