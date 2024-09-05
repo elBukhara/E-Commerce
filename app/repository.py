@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy import select, delete
 from database import ItemOrm, UserOrm, CartOrm, async_session
 from schemas import AddItem, Item, UserCreate, User, CartCreate, Cart
@@ -52,9 +53,16 @@ class UserRepository:
     @classmethod
     async def create_user(cls, user: UserCreate) -> int:
         async with async_session() as session:
-            user_dict = user.model_dump()
-            # TODO fix unique constraint on username
+            # Check if the username is already taken
+            query = select(UserOrm).where(UserOrm.username == user.username)
+            result = await session.execute(query)
+            existing_user = result.scalar_one_or_none()
             
+            if existing_user:
+                # If the username exists, raise an exception
+                raise HTTPException(status_code=400, detail="Username already taken. Please choose another one.")
+            
+            user_dict = user.model_dump()
             user = UserOrm(**user_dict)
             session.add(user)
             
@@ -80,6 +88,19 @@ class CartRepository:
             await session.flush()
             await session.commit()
             return cart.id
+    
+    @classmethod
+    async def delete_cart(cls, cart_id: int):
+        async with async_session() as session:
+            result = await session.execute(
+                delete(CartOrm)
+                .where(CartOrm.id == cart_id)
+                )
+            
+            await session.flush()
+            await session.commit()
+            
+            return result
     
     @classmethod
     async def get_user_cart(cls, user_id: int) -> list[Cart]:

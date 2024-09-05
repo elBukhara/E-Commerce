@@ -1,5 +1,4 @@
-from fastapi import APIRouter
-from fastapi import Depends
+from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated
 
 from schemas import UserCreate, User
@@ -14,9 +13,12 @@ router = APIRouter(
 async def create_user(
     user: Annotated[UserCreate, Depends()]
 ):
-    # TODO fix unique constraint on username
-    user_id = await UserRepository.create_user(user)
-    return {"message": "User created", "user_id": user_id}
+    try:
+        user_id = await UserRepository.create_user(user)
+        return {"status": "200", "detail": "User created", "user_id": user_id}
+    except HTTPException as e:
+        raise e
+    
 
 @router.get("/get/{user_id}")
 async def get_user(user_id: int) -> User:
