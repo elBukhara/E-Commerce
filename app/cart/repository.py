@@ -1,6 +1,8 @@
 from sqlalchemy import select, delete, update
+from sqlalchemy.orm import selectinload
 from database import async_session
 
+from items.models import ItemOrm
 from .models import CartOrm
 from .schemas import CartCreate, Cart
 
@@ -50,8 +52,13 @@ class CartRepository:
     async def get_user_cart(cls, user_id: int) -> list[Cart]:
         async with async_session() as session:
             # Load the cart items along with the item and its category
-            query = select(CartOrm).where(CartOrm.user_id == user_id)
-                        
+            query = (
+                select(CartOrm)
+                .options(
+                    selectinload(CartOrm.item).selectinload(ItemOrm.category)  # Load item and category
+                )
+                .where(CartOrm.user_id == user_id)
+            )           
             result = await session.execute(query)
             cart_items = result.scalars().all()
             return cart_items

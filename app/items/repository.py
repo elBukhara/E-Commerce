@@ -48,7 +48,13 @@ class ItemRepository:
     @classmethod
     async def get_item(cls, item_id: int) -> Item:
         async with async_session() as session:            
-            query = select(ItemOrm).where(ItemOrm.id == item_id)
+            query = (
+                select(ItemOrm)
+                .options(
+                    selectinload(ItemOrm.category)
+                )
+                .where(ItemOrm.id == item_id)
+            )
             result = await session.execute(query)
             item = result.scalar_one_or_none()
 
