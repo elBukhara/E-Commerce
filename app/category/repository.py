@@ -2,8 +2,8 @@ from fastapi import HTTPException
 from sqlalchemy import select, delete
 
 from database import async_session
+from .schemas import AddCategory
 from items.models import CategoryOrm
-from items.schemas import AddCategory
 
 class CategoryRepository:
     @classmethod

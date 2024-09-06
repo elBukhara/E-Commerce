@@ -1,21 +1,17 @@
 from pydantic import BaseModel
 from typing import Optional
 
-class AddCategory(BaseModel):
-    name: str
+from category.schemas import Category
 
-class Category(AddCategory):
-    id: int
-
-    class Config:
-        orm_mode = True
-
-class AddItem(BaseModel):
+class ItemBase(BaseModel):
     name: str
     description: Optional[str] = None
     category_id: int  # Include category_id to associate with a category
 
-class Item(AddItem):
+class AddItem(ItemBase):
+    pass
+
+class Item(ItemBase):
     id: int
     category: Optional[Category]  # Include the category information
 

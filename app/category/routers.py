@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from typing import Annotated
 
-from items.schemas import Category, AddCategory
+from .schemas import Category, AddCategory
 from .repository import CategoryRepository
 
 router = APIRouter(
