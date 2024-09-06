@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from items.schemas import Item
 
 class CartBase(BaseModel):
     user_id: int
@@ -11,7 +10,7 @@ class CartCreate(CartBase):
 
 class Cart(CartBase):
     id: int
-    item: Item # Include the item information
+    # item: Item # Include the item information
 
     class Config:
         orm_mode = True
