@@ -26,3 +26,9 @@ async def delete_cart(cart_id: int):
 async def get_user_cart(user_id: int) -> list[Cart]:
     cart_items = await CartRepository.get_user_cart(user_id)
     return cart_items
+
+@router.put("/decrement_quantity/{user_id}/{cart_id}")
+async def decrement_quantity_of_item_in_cart(user_id: int, cart_id: int):
+    await CartRepository.decrement_quantity_of_item_in_cart(user_id=user_id, cart_id=cart_id)
+    
+    return {"message": "Item quantity decremented", "cart_id": cart_id}

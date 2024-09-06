@@ -1,8 +1,6 @@
 from sqlalchemy import select, delete, update
 from database import async_session
-from sqlalchemy.orm import selectinload
 
-from items.models import ItemOrm
 from .models import CartOrm
 from .schemas import CartCreate, Cart
 
@@ -71,3 +69,31 @@ class CartRepository:
             await session.commit()
             
             return cart_id
+    
+    @classmethod
+    async def decrement_quantity_of_item_in_cart(cls, user_id: int, cart_id: int) -> int:
+        async with async_session() as session:
+            existing_cart_query = select(CartOrm).where(
+                CartOrm.user_id == user_id,
+                CartOrm.id == cart_id
+            )
+            result = await session.execute(existing_cart_query)
+            existing_cart = result.scalar_one_or_none()
+
+            if not existing_cart:
+                raise ValueError("Item not found in cart")
+
+            if existing_cart.quantity > 1:
+                new_quantity = existing_cart.quantity - 1
+                update_query = (
+                    update(CartOrm)
+                    .where(CartOrm.id == existing_cart.id)
+                    .values(quantity=new_quantity)
+                )
+                await session.execute(update_query)
+            else:
+                await cls.delete_cart(existing_cart.id)
+
+            await session.commit()
+            return existing_cart.id
+    
