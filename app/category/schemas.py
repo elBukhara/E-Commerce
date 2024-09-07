@@ -11,3 +11,10 @@ class Category(CategoryBase):
 
     class Config:
         orm_mode = True
+
+class AddCategoryResponse(BaseModel):
+    message: str
+    category_id: int
+
+class DeleteCategoryResponse(AddCategoryResponse):
+    pass

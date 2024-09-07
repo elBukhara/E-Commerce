@@ -6,7 +6,7 @@ from category.schemas import Category
 class ItemBase(BaseModel):
     name: str
     description: Optional[str] = None
-    category_id: int  # Include category_id to associate with a category
+    category_id: int  # TODO: define if Category is required/optional
 
 class AddItem(ItemBase):
     pass
@@ -17,3 +17,10 @@ class Item(ItemBase):
 
     class Config:
         orm_mode = True
+
+class AddItemResponse(BaseModel):
+    message: str
+    item_id: int
+
+class DeleteItemResponse(AddItemResponse):
+    pass

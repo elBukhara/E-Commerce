@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from typing import Annotated
 
-from .schemas import Category, AddCategory
+from .schemas import Category, AddCategory, AddCategoryResponse, DeleteCategoryResponse
 from .repository import CategoryRepository
 
 router = APIRouter(
@@ -12,9 +12,14 @@ router = APIRouter(
 @router.post("/add_category")
 async def add_category(
     category: Annotated[AddCategory, Depends()]
-):
-    category_id = await CategoryRepository.add_category(category)
-    return {"message": "Category added", "category_id": category_id}
+) -> AddCategoryResponse:
+    response = await CategoryRepository.add_category(category)
+    return response
+
+@router.delete("/delete_category/{category_id}")
+async def delete_category(category_id: int) -> DeleteCategoryResponse:
+    response = await CategoryRepository.delete_category(category_id)
+    return response
 
 @router.get("/all_categories")
 async def all_categories() -> list[Category]:

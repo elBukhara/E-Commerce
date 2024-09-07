@@ -1,15 +1,17 @@
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import selectinload
+from fastapi import HTTPException
 from database import async_session
 
 from items.models import ItemOrm
 from .models import CartOrm
-from .schemas import CartCreate, Cart
+from .schemas import CartCreate, Cart, CartCreateResponse, CartDeleteResponse
+
+# TODO: handle the response when the method refers to another method (Now it returns None)
 
 class CartRepository:
     @classmethod
     async def add_to_cart(cls, cart: CartCreate) -> int:
-        # TODO: add/remove items in a single dictionary
         async with async_session() as session:
 
             existing_cart_query = select(CartOrm).where(
@@ -20,33 +22,40 @@ class CartRepository:
             existing_cart = result.scalar_one_or_none()
             
             if existing_cart:
-                print(existing_cart.id)
                 await cls.increment_quantity_of_item_in_cart(cart_quantity=cart.quantity, cart_id=existing_cart.id)
             else:            
-                cart_dict = cart.model_dump()
-                
+                cart_dict = cart.model_dump()  
                 cart = CartOrm(**cart_dict)
                 session.add(cart)
                 
                 await session.flush()
                 await session.commit()
-                return cart.id
             
             # Return the cart ID (either updated or newly created)
-            return existing_cart.id if existing_cart else cart.id
+            if existing_cart:
+                return CartCreateResponse(message="Item quantity was incremented in the cart.", cart_id=existing_cart.id)
+            else:
+                return CartCreateResponse(message="Item added to cart", cart_id=cart.id)
     
     @classmethod
     async def delete_cart(cls, cart_id: int):
         async with async_session() as session:
-            result = await session.execute(
-                delete(CartOrm)
-                .where(CartOrm.id == cart_id)
+            cart = await session.get(CartOrm, cart_id)
+            
+            if not cart:
+                raise HTTPException(
+                    status_code=400, 
+                    detail="The cart does not exist."
                 )
-            
-            await session.flush()
-            await session.commit()
-            
-            return result
+            else:
+                await session.execute(
+                    delete(CartOrm)
+                    .where(CartOrm.id == cart_id)
+                )    
+                await session.flush()
+                await session.commit()
+                
+                return CartDeleteResponse(message="Cart was successfully deleted.", cart_id=cart_id)
     
     @classmethod
     async def get_user_cart(cls, user_id: int) -> list[Cart]:
@@ -98,9 +107,9 @@ class CartRepository:
                     .values(quantity=new_quantity)
                 )
                 await session.execute(update_query)
+                await session.commit()
+                
+                return CartDeleteResponse(message="Item quantity decremented.", cart_id=existing_cart.id)
             else:
                 await cls.delete_cart(existing_cart.id)
-
-            await session.commit()
-            return existing_cart.id
-    
+                return CartDeleteResponse(message="Cart was successfully deleted.", cart_id=existing_cart.id)

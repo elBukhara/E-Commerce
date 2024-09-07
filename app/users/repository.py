@@ -3,7 +3,7 @@ from sqlalchemy import select
 from database import async_session
 
 from .models import UserOrm
-from .schemas import UserCreate, User
+from .schemas import UserCreate, User, CreateUserResponse
 
 class UserRepository:
     @classmethod
@@ -17,14 +17,14 @@ class UserRepository:
             if existing_user:
                 # If the username exists, raise an exception
                 raise HTTPException(status_code=400, detail="Username already taken. Please choose another one.")
-            
-            user_dict = user.model_dump()
-            user = UserOrm(**user_dict)
-            session.add(user)
-            
-            await session.flush()
-            await session.commit()
-            return user.id
+            else:            
+                user_dict = user.model_dump()
+                user = UserOrm(**user_dict)
+                session.add(user)                
+                await session.flush()
+                await session.commit()
+                
+                return CreateUserResponse(detail="User was successfully created.", user_id=user.id) 
     
     @classmethod
     async def get_user(cls, user_id: int) -> User:

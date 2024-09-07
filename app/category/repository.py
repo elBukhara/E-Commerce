@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy import select, delete
 
 from database import async_session
-from .schemas import AddCategory
+from .schemas import AddCategory, AddCategoryResponse, DeleteCategoryResponse
 from items.models import CategoryOrm
 
 class CategoryRepository:
@@ -15,27 +15,35 @@ class CategoryRepository:
             
             if existing_category:
                 raise HTTPException(status_code=400, detail="Category already exists. Please choose another one.")
-            
-            category_dict = category.model_dump()
-            category = CategoryOrm(**category_dict)
-            session.add(category)
-            
-            await session.flush()
-            await session.commit()
-            return category.id
+            else:
+                category_dict = category.model_dump()
+                category = CategoryOrm(**category_dict)
+                session.add(category)
+                
+                await session.flush()
+                await session.commit()
+                
+                return AddCategoryResponse(message="Category was successfully added.", category_id=category.id)
     
     @classmethod
     async def delete_category(cls, category_id: int):
         async with async_session() as session:
-            result = await session.execute(
-                delete(CategoryOrm)
-                .where(CategoryOrm.id == category_id)
+            category = await session.get(CategoryOrm, category_id)
+            
+            if not category:
+                raise HTTPException(
+                    status_code=400, 
+                    detail="Category does not exist."
                 )
-            
-            await session.flush()
-            await session.commit()
-            
-            return result
+            else:    
+                await session.execute(
+                    delete(CategoryOrm)
+                    .where(CategoryOrm.id == category_id)
+                    )
+                await session.flush()
+                await session.commit()
+                
+                return DeleteCategoryResponse(message="Category was successfully deleted.", category_id=category_id)
 
     @classmethod
     async def get_all_categories(cls) -> list[CategoryOrm]:

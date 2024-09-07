@@ -15,3 +15,10 @@ class Cart(CartBase):
 
     class Config:
         orm_mode = True
+
+class CartCreateResponse(BaseModel):
+    message: str
+    cart_id: int
+
+class CartDeleteResponse(CartCreateResponse):
+    pass

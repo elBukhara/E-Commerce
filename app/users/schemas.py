@@ -11,3 +11,7 @@ class User(UserBase):
 
     class Config:
         orm_mode = True
+
+class CreateUserResponse(BaseModel):
+    detail: str
+    user_id: int
