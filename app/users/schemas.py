@@ -8,6 +8,11 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
+    username: str
+    email: str
+    is_active: bool
+    is_superuser: bool
+    is_verified: bool
 
     class Config:
         orm_mode = True

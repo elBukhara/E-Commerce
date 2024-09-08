@@ -1,13 +1,8 @@
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String
+from sqlalchemy.orm import Mapped, relationship
 
-from database import Base
+from auth.models import UserAuth
+from cart.models import CartOrm
 
-class UserOrm(Base):
-    __tablename__ = "users"
+class UserOrm(UserAuth):
     
-    id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(String(100), unique=True)
-    password: Mapped[str] = mapped_column(String(100))  # Store hashed password
-    
-    carts = relationship("CartOrm", back_populates="user")
+    carts: Mapped[list["CartOrm"]] = relationship("CartOrm", back_populates="user")
