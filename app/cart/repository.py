@@ -7,7 +7,6 @@ from items.models import ItemOrm
 from .models import CartOrm
 from .schemas import CartCreate, Cart, CartCreateResponse, CartDeleteResponse
 
-# TODO: handle the response when the method refers to another method (Now it returns None)
 
 class CartRepository:
     @classmethod

@@ -6,7 +6,7 @@ from category.schemas import Category
 class ItemBase(BaseModel):
     name: str
     description: Optional[str] = None
-    category_id: int  # TODO: define if Category is required/optional
+    category_id: int
 
 class AddItem(ItemBase):
     pass
