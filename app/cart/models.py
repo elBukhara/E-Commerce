@@ -7,7 +7,7 @@ class CartOrm(Base):
     __tablename__ = "carts"
     
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("auth.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     item_id: Mapped[int] = mapped_column(ForeignKey("items.id"))
     quantity: Mapped[int] = mapped_column(Integer, default=1)
     

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from database import create_tables, delete_tables
 
-from auth.routers import router as auth_router
+from auth.routers.auth import router as auth_router
 from items.routers import router as items_router
 from cart.routers import router as cart_router
 from users.routers import router as users_router

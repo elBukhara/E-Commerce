@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Mapped, relationship
 
-from auth.models import UserAuth
+from auth.models.user import UserAuth
 from cart.models import CartOrm
 
 class UserOrm(UserAuth):
