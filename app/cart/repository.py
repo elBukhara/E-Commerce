@@ -7,14 +7,15 @@ from items.models import ItemOrm
 from .models import CartOrm
 from .schemas import CartCreate, Cart, CartCreateResponse, CartDeleteResponse
 
+# TODO: Improve effeciency and readability of functions
 
 class CartRepository:
     @classmethod
-    async def add_to_cart(cls, cart: CartCreate) -> int:
+    async def add_to_cart(cls, user_id: int, cart: CartCreate) -> int:
         async with async_session() as session:
 
             existing_cart_query = select(CartOrm).where(
-                CartOrm.user_id == cart.user_id,
+                CartOrm.user_id == user_id,
                 CartOrm.item_id == cart.item_id
                 )
             result = await session.execute(existing_cart_query)
@@ -37,7 +38,7 @@ class CartRepository:
                 return CartCreateResponse(message="Item added to cart", cart_id=cart.id)
     
     @classmethod
-    async def delete_cart(cls, cart_id: int):
+    async def delete_cart(cls, user_id: int, cart_id: int):
         async with async_session() as session:
             cart = await session.get(CartOrm, cart_id)
             
